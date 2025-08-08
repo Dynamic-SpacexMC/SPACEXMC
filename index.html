@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPACEXMC TIERLIST</title>
+    <style>
+        :root {
+            --space-dark: #0B0D17;
+            --space-blue: #1E2A4A;
+            --neon-blue: #00F0FF;
+            --neon-pink: #FF00F0;
+            --star-glow: rgba(255, 255, 255, 0.8);
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--space-dark);
+            color: white;
+            background-image: 
+                radial-gradient(var(--star-glow) 1px, transparent 1px),
+                radial-gradient(var(--star-glow) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .title {
+            font-size: 3.5rem;
+            margin: 0;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            letter-spacing: 3px;
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .subtitle {
+            color: var(--neon-blue);
+            margin-top: 5px;
+            font-size: 1.2rem;
+        }
+        
+        .auth-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .auth-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+        
+        .login-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 42, 74, 0.95);
+            border: 1px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 30px;
+            width: 350px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+        
+        .login-panel h2 {
+            text-align: center;
+            color: var(--neon-blue);
+            margin-top: 0;
+        }
+        
+        .login-panel input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-blue);
+            border-radius: 4px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .login-panel .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+        
+        .login-message {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            min-height: 20px;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: var(--neon-pink);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .admin-controls {
+            background: rgba(30, 42, 74, 0.7);
+            border: 1px solid var(--neon-pink);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 0 auto 30px;
+            max-width: 800px;
+            box-shadow: 0 0 20px rgba(255, 0, 240, 0.2);
+            display: none;
+        }
+        
+        .admin-controls h2 {
+            color: var(--neon-pink);
+            margin-top: 0;
+            text-align: center;
+        }
+        
+        .add-player {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .add-player input {
+            flex-grow: 1;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-blue);
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .add-player select {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-blue);
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .add-player .btn {
+            padding: 10px 20px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .tester-list {
+            list-style: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .tester-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .tester-list li button {
+            background: #ff4444;
+            border: none;
+            color: white;
+            border-radius: 3px;
+            padding: 2px 8px;
+            cursor: pointer;
+        }
+        
+        .tiers-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .tier {
+            background: rgba(30, 42, 74, 0.5);
+            border: 1px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .tier:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0, 240, 255, 0.3);
+        }
+        
+        .tier h2 {
+            text-align: center;
+            margin-top: 0;
+            color: var(--neon-blue);
+            border-bottom: 1px solid var(--neon-blue);
+            padding-bottom: 10px;
+        }
+        
+        .player-list {
+            list-style: none;
+            padding: 0;
+            min-height: 100px;
+        }
+        
+        .player-list li {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--neon-blue);
+        }
+        
+        .player-list li:hover {
+            background: rgba(0, 240, 255, 0.1);
+        }
+        
+        .remove-btn {
+            background: transparent;
+            color: #ff4444;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: none;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .tiers-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .add-player {
+                flex-direction: column;
+            }
+            
+            .auth-btn {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Auth Button -->
+    <button class="auth-btn" id="authBtn">LOGIN</button>
+    
+    <!-- Login Panel -->
+    <div class="login-panel" id="loginPanel">
+        <button class="close-btn" id="closeLogin">&times;</button>
+        <h2>COMMAND CENTER ACCESS</h2>
+        
+        <div class="tab-container">
+            <div class="tab active" data-tab="admin">Admin</div>
+            <div class="tab" data-tab="tester">Tester</div>
+        </div>
+        
+        <!-- Admin Login -->
+        <div class="tab-content active" id="adminTab">
+            <input type="password" id="adminPassword" placeholder="Admin Code">
+            <button class="btn" onclick="login('admin')">AUTHENTICATE</button>
+        </div>
+        
+        <!-- Tester Login -->
+        <div class="tab-content" id="testerTab">
+            <input type="text" id="testerUsername" placeholder="Tester ID">
+            <input type="password" id="testerPassword" placeholder="Tester Code">
+            <button class="btn" onclick="login('tester')">AUTHENTICATE</button>
+        </div>
+        
+        <p class="login-message" id="loginMessage"></p>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">SPACEXMC</h1>
+            <p class="subtitle">OFFICIAL PLAYER TIERLIST</p>
+        </div>
+        
+        <!-- Admin Controls -->
+        <div id="adminControls" class="admin-controls">
+            <h2>TIER CONTROL PANEL</h2>
+            
+            <!-- Add Player -->
+            <div class="add-player">
+                <input type="text" id="playerName" placeholder="Player ID">
+                <select id="tierSelect">
+                    <option value="ht1">HT1</option>
+                    <option value="lt1">LT1</option>
+                    <option value="ht2">HT2</option>
+                    <option value="lt2">LT2</option>
+                    <option value="ht3">HT3</option>
+                    <option value="lt3">LT3</option>
+                    <option value="ht4">HT4</option>
+                    <option value="lt4">LT4</option>
+                    <option value="ht5">HT5</option>
+                    <option value="lt5">LT5</option>
+                </select>
+                <button class="btn" onclick="addPlayer()">DEPLOY</button>
+            </div>
+            
+            <!-- Tester Management (only for admin) -->
+            <div id="testerManagement" style="margin-top: 20px; display: none;">
+                <h3 style="color: var(--neon-blue);">TESTER MANAGEMENT</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="newTesterId" placeholder="New Tester ID" style="flex: 1;">
+                    <input type="password" id="newTesterPass" placeholder="New Tester Code" style="flex: 1;">
+                    <button class="btn" onclick="addTester()">ADD TESTER</button>
+                </div>
+                <ul class="tester-list" id="testerList"></ul>
+            </div>
+        </div>
+        
+        <!-- Tiers Container -->
+        <div class="tiers-container">
+            <!-- HT1 -->
+            <div class="tier" id="ht1">
+                <h2>HT1</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- LT1 -->
+            <div class="tier" id="lt1">
+                <h2>LT1</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- HT2 -->
+            <div class="tier" id="ht2">
+                <h2>HT2</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- LT2 -->
+            <div class="tier" id="lt2">
+                <h2>LT2</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- HT3 -->
+            <div class="tier" id="ht3">
+                <h2>HT3</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- LT3 -->
+            <div class="tier" id="lt3">
+                <h2>LT3</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- HT4 -->
+            <div class="tier" id="ht4">
+                <h2>HT4</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- LT4 -->
+            <div class="tier" id="lt4">
+                <h2>LT4</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- HT5 -->
+            <div class="tier" id="ht5">
+                <h2>HT5</h2>
+                <ul class="player-list"></ul>
+            </div>
+            
+            <!-- LT5 -->
+            <div class="tier" id="lt5">
+                <h2>LT5</h2>
+                <ul class="player-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script>
+        // ===== FIREBASE CONFIGURATION =====
+        // Replace with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPNIT5xm_hopR4wLoKJ4UyB1S89xIKtfE",
+            authDomain: "spacexmc-86dfb.firebaseapp.com",
+            databaseURL: "https://spacexmc-86dfb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "spacexmc-86dfb",
+            storageBucket: "spacexmc-86dfb.firebasestorage.app",
+            messagingSenderId: "666946140737",
+            appId: "1:666946140737:web:21cf52172572c9031ea4c0",
+            measurementId: "G-3GGFDYNTYJ"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ===== APPLICATION CODE =====
+        const CONFIG = {
+            ADMIN_CODE: "SPACEXMC42", // Change this to your admin password
+            STARFIELD: true,
+            GLOW_EFFECTS: true
+        };
+        
+        let currentUser = null;
+        let testers = {};
+        
+        // DOM Elements
+        const authBtn = document.getElementById('authBtn');
+        const closeLogin = document.getElementById('closeLogin');
+        const loginPanel = document.getElementById('loginPanel');
+        const overlay = document.getElementById('overlay');
+        const adminControls = document.getElementById('adminControls');
+        const loginMessage = document.getElementById('loginMessage');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const testerManagement = document.getElementById('testerManagement');
+        
+        // Initialize the application
+        function initSystem() {
+            loadAllData();
+            setupEventListeners();
+            if (CONFIG.STARFIELD) createStarfield();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            authBtn.addEventListener('click', toggleAuth);
+            closeLogin.addEventListener('click', hideLoginPanel);
+            overlay.addEventListener('click', hideLoginPanel);
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
+                });
+            });
+        }
+        
+        // Toggle auth (login/logout)
+        function toggleAuth() {
+            if (currentUser) {
+                logout();
+            } else {
+                showLoginPanel();
+            }
+        }
+        
+        // Show login panel
+        function showLoginPanel() {
+            loginPanel.style.display = 'block';
+            overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Hide login panel
+        function hideLoginPanel() {
+            loginPanel.style.display = 'none';
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            loginMessage.textContent = '';
+        }
+        
+        // Login function
+        function login(type) {
+            if (type === 'admin') {
+                const code = document.getElementById('adminPassword').value.trim();
+                if (code === CONFIG.ADMIN_CODE) {
+                    currentUser = { type: 'admin' };
+                    authBtn.textContent = 'LOGOUT';
+                    hideLoginPanel();
+                    adminControls.style.display = 'block';
+                    testerManagement.style.display = 'block';
+                    activateAdminMode();
+                    saveAllData(); // Save the session
+                } else {
+                    loginMessage.textContent = 'INVALID ADMIN CODE';
+                }
+            } else if (type === 'tester') {
+                const username = document.getElementById('testerUsername').value.trim();
+                const password = document.getElementById('testerPassword').value.trim();
+                
+                if (testers[username] && testers[username].password === password) {
+                    currentUser = { type: 'tester', username };
+                    authBtn.textContent = 'LOGOUT';
+                    hideLoginPanel();
+                    adminControls.style.display = 'block';
+                    testerManagement.style.display = 'none';
+                    activateAdminMode();
+                    saveAllData(); // Save the session
+                } else {
+                    loginMessage.textContent = 'INVALID TESTER CREDENTIALS';
+                }
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            currentUser = null;
+            authBtn.textContent = 'LOGIN';
+            adminControls.style.display = 'none';
+            deactivateAdminMode();
+            saveAllData(); // Save the session
+        }
+        
+        // Add player to tier
+        function addPlayer() {
+            if (!currentUser) return alert("Login as admin/tester to add players.");
+            
+            const playerName = document.getElementById('playerName').value.trim();
+            const tierSelect = document.getElementById('tierSelect').value;
+            
+            if (!playerName) {
+                alert("Please enter player ID");
+                return;
+            }
+
+            removePlayerFromAllTiers(playerName);
+            const tierElement = document.getElementById(tierSelect);
+            const playerList = tierElement.querySelector('.player-list');
+
+            const playerItem = document.createElement('li');
+            playerItem.innerHTML = `${escapeHtml(playerName)} <button class="remove-btn" onclick="removePlayer(this)">✖</button>`;
+            playerList.appendChild(playerItem);
+            document.getElementById('playerName').value = '';
+            
+            saveAllData(); // Save to Firebase
+        }
+        
+        // Remove player from all tiers
+        function removePlayerFromAllTiers(playerName) {
+            const tiers = ['ht1','lt1','ht2','lt2','ht3','lt3','ht4','lt4','ht5','lt5'];
+            tiers.forEach(tier => {
+                const playerList = document.getElementById(tier).querySelector('.player-list');
+                Array.from(playerList.children).forEach(li => {
+                    if (li.textContent.replace('✖','').trim() === playerName) li.remove();
+                });
+            });
+        }
+        
+        // Remove player
+        function removePlayer(button) {
+            if (!currentUser) return alert("Not allowed");
+            const playerItem = button.parentElement;
+            playerItem.remove();
+            saveAllData(); // Save to Firebase
+        }
+        
+        // Tester management
+        function addTester() {
+            if (!currentUser || currentUser.type !== 'admin') return alert("Admin only");
+            
+            const id = document.getElementById('newTesterId').value.trim();
+            const pass = document.getElementById('newTesterPass').value.trim();
+            
+            if (!id || !pass) return alert("Please enter both tester ID and code");
+            
+            testers[id] = { password: pass };
+            updateTesterList();
+            saveAllData(); // Save to Firebase
+            
+            document.getElementById('newTesterId').value = '';
+            document.getElementById('newTesterPass').value = '';
+        }
+        
+        function removeTester(id) {
+            if (!currentUser || currentUser.type !== 'admin') return alert("Admin only");
+            delete testers[id];
+            updateTesterList();
+            saveAllData(); // Save to Firebase
+        }
+        
+        function updateTesterList() {
+            const testerList = document.getElementById('testerList');
+            testerList.innerHTML = '';
+            
+            for (const id in testers) {
+                const li = document.createElement('li');
+                li.innerHTML = `${escapeHtml(id)} <button onclick="removeTester('${escapeJs(id)}')">REMOVE</button>`;
+                testerList.appendChild(li);
+            }
+        }
+        
+        // Admin mode
+        function activateAdminMode() {
+            document.querySelectorAll('.remove-btn').forEach(btn => btn.style.display = 'block');
+        }
+        
+        function deactivateAdminMode() {
+            document.querySelectorAll('.remove-btn').forEach(btn => btn.style.display = 'none');
+        }
+        
+        // Save all data to Firebase
+        function saveAllData() {
+            // Gather players data
+            const playerDatabase = {};
+            const tiers = ['ht1','lt1','ht2','lt2','ht3','lt3','ht4','lt4','ht5','lt5'];
+            
+            tiers.forEach(tier => {
+                const playerList = document.getElementById(tier).querySelector('.player-list');
+                const players = Array.from(playerList.children).map(li => li.textContent.replace('✖','').trim());
+                playerDatabase[tier] = players;
+            });
+            
+            // Save to Firebase
+            database.ref('spacexmc/tierlist/players').set(playerDatabase);
+            database.ref('spacexmc/tierlist/testers').set(testers);
+            
+            // Save current user session to localStorage
+            if (currentUser) {
+                localStorage.setItem('spacexmc_currentUser', JSON.stringify(currentUser));
+            } else {
+                localStorage.removeItem('spacexmc_currentUser');
+            }
+        }
+        
+        // Load all data from Firebase
+        function loadAllData() {
+            // Load players
+            database.ref('spacexmc/tierlist/players').once('value').then(snapshot => {
+                const playerDatabase = snapshot.val();
+                
+                if (playerDatabase) {
+                    for (const tier in playerDatabase) {
+                        const playerList = document.getElementById(tier).querySelector('.player-list');
+                        playerList.innerHTML = '';
+                        
+                        playerDatabase[tier].forEach(playerName => {
+                            const playerItem = document.createElement('li');
+                            playerItem.innerHTML = `${escapeHtml(playerName)} <button class="remove-btn" onclick="removePlayer(this)" style="display:none">✖</button>`;
+                            playerList.appendChild(playerItem);
+                        });
+                    }
+                }
+            });
+            
+            // Load testers
+            database.ref('spacexmc/tierlist/testers').once('value').then(snapshot => {
+                testers = snapshot.val() || {};
+                updateTesterList();
+            });
+            
+            // Load current user session
+            const savedUser = localStorage.getItem('spacexmc_currentUser');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    
+                    if (currentUser) {
+                        if (currentUser.type === 'admin') {
+                            authBtn.textContent = 'LOGOUT';
+                            adminControls.style.display = 'block';
+                            testerManagement.style.display = 'block';
+                            activateAdminMode();
+                        } else if (currentUser.type === 'tester' && testers[currentUser.username]) {
+                            authBtn.textContent = 'LOGOUT';
+                            adminControls.style.display = 'block';
+                            testerManagement.style.display = 'none';
+                            activateAdminMode();
+                        } else {
+                            currentUser = null;
+                        }
+                    }
+                } catch(e) {
+                    console.error("Error loading user session:", e);
+                }
+            }
+        }
+        
+        // Helper functions
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
+        }
+        
+        function escapeJs(s) {
+            return (''+s).replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+        
+        // Starfield effect
+        function createStarfield() {
+            const body = document.body;
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'fixed';
+                star.style.width = `${Math.random()*3}px`;
+                star.style.height = star.style.width;
+                star.style.backgroundColor = 'white';
+                star.style.borderRadius = '50%';
+                star.style.left = `${Math.random()*100}vw`;
+                star.style.top = `${Math.random()*100}vh`;
+                star.style.opacity = Math.random();
+                star.style.zIndex = '-1';
+                
+                if (CONFIG.GLOW_EFFECTS) {
+                    star.style.boxShadow = `0 0 ${Math.random()*10}px white`;
+                }
+                
+                star.style.animation = `twinkle ${2+Math.random()*3}s infinite alternate`;
+                body.appendChild(star);
+            }
+            
+            const style = document.createElement('style');
+            style.textContent = `@keyframes twinkle{0%{opacity:0.2}100%{opacity:${CONFIG.GLOW_EFFECTS ? '1' : '0.8'}}}`;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize the app
+        window.addEventListener('DOMContentLoaded', initSystem);
+    </script>
+</body>
+</html>
