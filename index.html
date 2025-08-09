@@ -484,32 +484,37 @@
         </div>
     </div>
 
-    <script>
-        // 🔒 SECURE ADMIN PASSWORD CHECK (Hidden in ASCII codes)
-        function checkAdminPassword(input) {
-            const secretCode = [
-                83, 80, 65, 67, 69, 88, 77, 67, 52, 50
-            ];
-            
-            const inputCodes = Array.from(input).map(c => c.charCodeAt(0));
-            
-            if (inputCodes.length !== secretCode.length) return false;
-            
-            for (let i = 0; i < secretCode.length; i++) {
-                if (inputCodes[i] !== secretCode[i]) return false;
-            }
-            
-            return true;
-        }
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-        // Tester accounts (store properly in real projects)
-        const testers = {
-            "tester1": { password: "test123" },
-            "tester2": { password: "test456" }
+    <script>
+        // ===== FIREBASE CONFIGURATION =====
+        // Replace with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPNIT5xm_hopR4wLoKJ4UyB1S89xIKtfE",
+            authDomain: "spacexmc-86dfb.firebaseapp.com",
+            databaseURL: "https://spacexmc-86dfb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "spacexmc-86dfb",
+            storageBucket: "spacexmc-86dfb.firebasestorage.app",
+            messagingSenderId: "666946140737",
+            appId: "1:666946140737:web:21cf52172572c9031ea4c0",
+            measurementId: "G-3GGFDYNTYJ"
         };
 
-        // System state
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ===== APPLICATION CODE =====
+        const CONFIG = {
+            ADMIN_CODE: "SPACEXMC42", // Change this to your admin password
+            STARFIELD: true,
+            GLOW_EFFECTS: true
+        };
+        
         let currentUser = null;
+        let testers = {};
         
         // DOM Elements
         const authBtn = document.getElementById('authBtn');
@@ -522,18 +527,67 @@
         const tabContents = document.querySelectorAll('.tab-content');
         const testerManagement = document.getElementById('testerManagement');
         
+        // Initialize the application
+        function initSystem() {
+            loadAllData();
+            setupEventListeners();
+            if (CONFIG.STARFIELD) createStarfield();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            authBtn.addEventListener('click', toggleAuth);
+            closeLogin.addEventListener('click', hideLoginPanel);
+            overlay.addEventListener('click', hideLoginPanel);
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
+                });
+            });
+        }
+        
+        // Toggle auth (login/logout)
+        function toggleAuth() {
+            if (currentUser) {
+                logout();
+            } else {
+                showLoginPanel();
+            }
+        }
+        
+        // Show login panel
+        function showLoginPanel() {
+            loginPanel.style.display = 'block';
+            overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Hide login panel
+        function hideLoginPanel() {
+            loginPanel.style.display = 'none';
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            loginMessage.textContent = '';
+        }
+        
         // Login function
         function login(type) {
             if (type === 'admin') {
-                const input = document.getElementById('adminPassword').value.trim();
-                const isCorrect = checkAdminPassword(input);
-                
-                if (isCorrect) {
+                const code = document.getElementById('adminPassword').value.trim();
+                if (code === CONFIG.ADMIN_CODE) {
                     currentUser = { type: 'admin' };
                     authBtn.textContent = 'LOGOUT';
                     hideLoginPanel();
                     adminControls.style.display = 'block';
                     testerManagement.style.display = 'block';
+                    activateAdminMode();
+                    saveAllData(); // Save the session
                 } else {
                     loginMessage.textContent = 'INVALID ADMIN CODE';
                 }
@@ -547,6 +601,8 @@
                     hideLoginPanel();
                     adminControls.style.display = 'block';
                     testerManagement.style.display = 'none';
+                    activateAdminMode();
+                    saveAllData(); // Save the session
                 } else {
                     loginMessage.textContent = 'INVALID TESTER CREDENTIALS';
                 }
@@ -558,6 +614,8 @@
             currentUser = null;
             authBtn.textContent = 'LOGIN';
             adminControls.style.display = 'none';
+            deactivateAdminMode();
+            saveAllData(); // Save the session
         }
         
         // Add player to tier
@@ -577,9 +635,11 @@
             const playerList = tierElement.querySelector('.player-list');
 
             const playerItem = document.createElement('li');
-            playerItem.innerHTML = `${playerName} <button class="remove-btn" onclick="removePlayer(this)">✖</button>`;
+            playerItem.innerHTML = `${escapeHtml(playerName)} <button class="remove-btn" onclick="removePlayer(this)">✖</button>`;
             playerList.appendChild(playerItem);
             document.getElementById('playerName').value = '';
+            
+            saveAllData(); // Save to Firebase
         }
         
         // Remove player from all tiers
@@ -598,6 +658,7 @@
             if (!currentUser) return alert("Not allowed");
             const playerItem = button.parentElement;
             playerItem.remove();
+            saveAllData(); // Save to Firebase
         }
         
         // Tester management
@@ -611,6 +672,7 @@
             
             testers[id] = { password: pass };
             updateTesterList();
+            saveAllData(); // Save to Firebase
             
             document.getElementById('newTesterId').value = '';
             document.getElementById('newTesterPass').value = '';
@@ -620,6 +682,7 @@
             if (!currentUser || currentUser.type !== 'admin') return alert("Admin only");
             delete testers[id];
             updateTesterList();
+            saveAllData(); // Save to Firebase
         }
         
         function updateTesterList() {
@@ -628,7 +691,7 @@
             
             for (const id in testers) {
                 const li = document.createElement('li');
-                li.innerHTML = `${id} <button onclick="removeTester('${id.replace(/'/g, "\\'")}')">REMOVE</button>`;
+                li.innerHTML = `${escapeHtml(id)} <button onclick="removeTester('${escapeJs(id)}')">REMOVE</button>`;
                 testerList.appendChild(li);
             }
         }
@@ -642,52 +705,125 @@
             document.querySelectorAll('.remove-btn').forEach(btn => btn.style.display = 'none');
         }
         
-        // UI functions
-        function showLoginPanel() {
-            loginPanel.style.display = 'block';
-            overlay.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function hideLoginPanel() {
-            loginPanel.style.display = 'none';
-            overlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            loginMessage.textContent = '';
-        }
-        
-        function toggleAuth() {
-            if (currentUser) {
-                logout();
-            } else {
-                showLoginPanel();
-            }
-        }
-        
-        // Initialize
-        function setupEventListeners() {
-            authBtn.addEventListener('click', toggleAuth);
-            closeLogin.addEventListener('click', hideLoginPanel);
-            overlay.addEventListener('click', hideLoginPanel);
+        // Save all data to Firebase
+        function saveAllData() {
+            // Gather players data
+            const playerDatabase = {};
+            const tiers = ['ht1','lt1','ht2','lt2','ht3','lt3','ht4','lt4','ht5','lt5'];
             
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    tab.classList.add('active');
-                    document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
-                });
+            tiers.forEach(tier => {
+                const playerList = document.getElementById(tier).querySelector('.player-list');
+                const players = Array.from(playerList.children).map(li => li.textContent.replace('✖','').trim());
+                playerDatabase[tier] = players;
             });
+            
+            // Save to Firebase
+            database.ref('spacexmc/tierlist/players').set(playerDatabase);
+            database.ref('spacexmc/tierlist/testers').set(testers);
+            
+            // Save current user session to localStorage
+            if (currentUser) {
+                localStorage.setItem('spacexmc_currentUser', JSON.stringify(currentUser));
+            } else {
+                localStorage.removeItem('spacexmc_currentUser');
+            }
         }
         
-        // Start the app
-        window.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
-            if (currentUser && currentUser.type === 'admin') {
-                testerManagement.style.display = 'block';
+        // Load all data from Firebase
+        function loadAllData() {
+            // Load players
+            database.ref('spacexmc/tierlist/players').once('value').then(snapshot => {
+                const playerDatabase = snapshot.val();
+                
+                if (playerDatabase) {
+                    for (const tier in playerDatabase) {
+                        const playerList = document.getElementById(tier).querySelector('.player-list');
+                        playerList.innerHTML = '';
+                        
+                        playerDatabase[tier].forEach(playerName => {
+                            const playerItem = document.createElement('li');
+                            playerItem.innerHTML = `${escapeHtml(playerName)} <button class="remove-btn" onclick="removePlayer(this)" style="display:none">✖</button>`;
+                            playerList.appendChild(playerItem);
+                        });
+                    }
+                }
+            });
+            
+            // Load testers
+            database.ref('spacexmc/tierlist/testers').once('value').then(snapshot => {
+                testers = snapshot.val() || {};
+                updateTesterList();
+            });
+            
+            // Load current user session
+            const savedUser = localStorage.getItem('spacexmc_currentUser');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    
+                    if (currentUser) {
+                        if (currentUser.type === 'admin') {
+                            authBtn.textContent = 'LOGOUT';
+                            adminControls.style.display = 'block';
+                            testerManagement.style.display = 'block';
+                            activateAdminMode();
+                        } else if (currentUser.type === 'tester' && testers[currentUser.username]) {
+                            authBtn.textContent = 'LOGOUT';
+                            adminControls.style.display = 'block';
+                            testerManagement.style.display = 'none';
+                            activateAdminMode();
+                        } else {
+                            currentUser = null;
+                        }
+                    }
+                } catch(e) {
+                    console.error("Error loading user session:", e);
+                }
             }
-        });
+        }
+        
+        // Helper functions
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>"']/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[m]));
+        }
+        
+        function escapeJs(s) {
+            return (''+s).replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+        
+        // Starfield effect
+        function createStarfield() {
+            const body = document.body;
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'fixed';
+                star.style.width = `${Math.random()*3}px`;
+                star.style.height = star.style.width;
+                star.style.backgroundColor = 'white';
+                star.style.borderRadius = '50%';
+                star.style.left = `${Math.random()*100}vw`;
+                star.style.top = `${Math.random()*100}vh`;
+                star.style.opacity = Math.random();
+                star.style.zIndex = '-1';
+                
+                if (CONFIG.GLOW_EFFECTS) {
+                    star.style.boxShadow = `0 0 ${Math.random()*10}px white`;
+                }
+                
+                star.style.animation = `twinkle ${2+Math.random()*3}s infinite alternate`;
+                body.appendChild(star);
+            }
+            
+            const style = document.createElement('style');
+            style.textContent = `@keyframes twinkle{0%{opacity:0.2}100%{opacity:${CONFIG.GLOW_EFFECTS ? '1' : '0.8'}}}`;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize the app
+        window.addEventListener('DOMContentLoaded', initSystem);
     </script>
 </body>
 </html>
