@@ -506,8 +506,10 @@
         const database = firebase.database();
 
         // ===== APPLICATION CODE =====
+// In your configuration section, replace the ADMIN_CODE with:
         const CONFIG = {
-            ADMIN_CODE: atob("U1BBQ0VYQEBkeW5hbWlj"), // Obfuscated admin code
+            ADMIN_CODE: [83, 80, 65, 67, 69, 88, 64, 100, 121, 110, 97, 109, 105, 99]
+            .map(c => String.fromCharCode(c)).join(''),
             STARFIELD: true,
             GLOW_EFFECTS: true
         };
